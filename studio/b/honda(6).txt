@@ -1,0 +1,18 @@
+156
+	ab wheel position
+	cd wheel torque
+
+1a6
+	a & 0x04 handbrake
+	c & 0x04 reverse
+
+17C
+	ab accel pedal
+	e & 0x01 brake on	
+	e & 0x80 accel > 0
+	
+188
+	d gear
+		0x01 Park
+		0x02 Reverse
+		

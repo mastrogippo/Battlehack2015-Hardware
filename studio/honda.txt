@@ -1,0 +1,46 @@
+156
+	ab wheel position
+	cd wheel rotation speed
+
+158
+	cd engine rpm
+	
+1a6
+	a & 0x04 handbrake
+	c & 0x04 reverse
+
+17C
+	ab accel pedal
+	e & 0x01 brake on	
+	e & 0x80 accel > 0
+	
+188
+	d gear
+		0x01 Park
+		0x02 Reverse
+		0x04 N
+		0x08 D
+		0x20 D3
+		0x40 2
+		0x80 1
+
+305
+	a seatbelts
+	0x40 driver off
+	0x80 passenger off
+	
+405
+	b doors
+	0x02 some doors open
+	e
+	0x40 dx
+	0x20 sx
+	0x80 back sx
+	f
+	0x01 back dx
+	0x02 trunk
+	
+can't find a way to pull down windows without OEM diagnostic equipment, we're hacking them. :(
+luci?
+velocità?
+auto chiusa?

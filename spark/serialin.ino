@@ -1,0 +1,151 @@
+int steerVal = 0;
+int lDoor;
+int rDoor;
+int bLeftDoor;
+int bRrightDoor;
+int temper;
+int slope;
+int baby;
+
+char tmps[40];
+
+
+void Gets(void);
+int pullDowns(String command);
+
+int RLY = D0;
+int tempPin = A1;             // potentiometer connected to analog pin A0
+int slopePin = A0;             // potentiometer connected to analog pin A0
+int babyPin = D1;         
+
+// EXAMPLE USAGE
+void setup()
+{
+  Serial.begin(9600);   // open serial over USB
+  // On Windows it will be necessary to implement the following line:
+  // Make sure your Serial Terminal app is closed before powering your device
+  // Now open your Serial Terminal, and hit any key to continue!
+ // while(!Serial.available()) Particle.process();
+  
+  Particle.variable("lDoor", &lDoor, INT);
+  Particle.variable("rDoor", &rDoor, INT);
+  Particle.variable("bLeftDoor", &bLeftDoor, INT);
+  Particle.variable("bRrightDoor", &bRrightDoor, INT);
+  Particle.variable("temper", &temper, INT);
+  Particle.variable("steerVal", &steerVal, INT);
+  Particle.variable("slope", &slope, INT);
+  Particle.variable("baby", &baby, INT);
+  Particle.function("pullDown", pullDowns);
+  
+  Serial.println("Hello Computer");
+  
+  Serial1.begin(9600);  // open serial over TX and RX pins
+  
+  pinMode(RLY, OUTPUT);
+  pinMode(babyPin, INPUT);
+
+    digitalWrite(RLY, LOW);
+}
+
+
+int pullDowns(String command)
+{
+    digitalWrite(RLY, HIGH);
+       // We'll leave it on for 1 second...
+      delay(1000);
+   digitalWrite(RLY, LOW);
+   return 0;
+}
+
+void loop() {
+int val;
+int val1;
+    Gets();
+    
+    val = analogRead(tempPin);  // read the input pin
+    temper = val/41;
+    val1 = analogRead(slopePin);  // read the input pin
+    slope = val1/410;
+    baby = 1-digitalRead(babyPin);
+    
+   // steerVal = val/20;
+    
+    sprintf(tmps,"t %d,s %d,w %d,p %d", temper, slope, steerVal, baby);
+    Serial.println(tmps);
+    
+    delay(500);   
+}
+
+
+
+unsigned char inData[20]; // Allocate some space for the string
+char inChar=-1; // Where to store the character read
+unsigned char idx = 0; // Index into array; where to store the character
+
+void ParseStr(void)
+{
+    
+    unsigned char tDoors;
+    unsigned char tWheel;
+    tWheel = inData[0];
+    tDoors = inData[1];
+    //	       Serial.println('3');
+
+
+
+
+
+    steerVal = tWheel;
+    
+    //no time to implement all doors :(
+    if((tDoors && 0x81) != 0)
+    {
+        lDoor = 1;
+        rDoor = 1;
+        bLeftDoor = 1;
+        bRrightDoor = 1;
+    }
+    else
+    {
+        lDoor = 0;
+        rDoor = 0;
+        bLeftDoor = 0;
+        bRrightDoor = 0;
+    }
+    
+    //sscanf(inData, "%d %d\r", tWheel, tDoors);
+    //sprintf(tmps,"GotD W%d, D%d", tWheel, tDoors);
+    //Serial.println(tmps);
+  	//       Serial.println('4');
+
+}
+
+void Gets(void){
+	 while(Serial1.available() > 0) // Don't read unless
+	   // there you know there is data
+	 {
+	   if(idx < 19) // One less than the size of the array
+	   {
+	      // Serial.println('1');
+		 inChar = Serial1.read(); // Read a character
+		 //sprintf(tmps,"\'%d-%02X\'",idx,inChar);
+         //Serial.println(tmps);
+
+		 inData[idx] = inChar; // Store it
+		 idx++; // Increment where to write next
+		 //inData[idx] = '\0'; // Null terminate the string
+	   }
+	   
+		if(inChar == 0xFE) // '\r') //finish
+		{
+    		//sprintf(tmps,"got \'%s\'",inData);
+            //Serial.println(tmps);
+ 	      // Serial.println('2');
+           ParseStr();
+		}
+		
+		if(inChar == 0xFF) //start from the beginning, ignore U
+			idx = 0;
+	 }
+}
+
